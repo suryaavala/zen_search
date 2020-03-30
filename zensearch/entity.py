@@ -1,13 +1,16 @@
 class Entity:
     def __init__(self, primary_key="_id"):
         # indices["_id"] = {1: d, 2: d}
-        self.indices = {}
         self.primary_key = primary_key
+        self.indices = {self.primary_key: {}}
 
     def build_indices(self, data):
         for item in data:
             primary_key = item[self.primary_key]
             for field in item:
+                if field == self.primary_key:
+                    self.indices[field][item[field]] = item
+                    continue
                 # if field is a list in itself, then we build index on each of those elements - sorta like one hot encoding
                 if isinstance(item[field], list) or isinstance(item[field], tuple):
                     for idx, sub_field in enumerate(item[field]):
@@ -45,5 +48,7 @@ if __name__ == "__main__":
 
     idz = users.indices
 
-    with open("./data/out/user_index.json", "w") as f:
+    with open(
+        "/Users/surya/Development/surya/zen_search/data/out/user_index.json", "w"
+    ) as f:
         json.dump(idz, f)
