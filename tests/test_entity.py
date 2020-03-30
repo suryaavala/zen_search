@@ -1,5 +1,4 @@
 import pytest
-import isort
 import json
 
 import os
