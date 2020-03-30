@@ -26,3 +26,10 @@
     - id: bandit
       args: [-l, --recursive, -x, tests]
       files: .py$
+- repo: local
+  hooks:
+    - id: cp-test-data-file
+      name: Data to Test Data
+      always_run: true
+      entry: python3 cp_data_test_data.py
+      language: system
