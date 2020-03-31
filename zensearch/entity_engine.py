@@ -57,7 +57,6 @@ class Entity:
                     self.__update_non_primary_index(
                         primary_key, field, data_point[field]
                     )
-        print(f"index: {self.indices}")
         return
 
     def __update_non_primary_index(self, primary_key_value, index_name, data_value):
@@ -76,9 +75,16 @@ class Entity:
         return
 
     def search(self, search_key, search_term):
-        return
+        if search_key == self.primary_key:
+            return self.get_data_from_primary_keys(search_term)
+        elif self.indices.get(search_key, None) is None:
+            return []
+        else:
+            return self.get_data_from_primary_keys(
+                self.indices[search_key].get(search_term, None)
+            )
 
-    def load_data_from_file(self, file_path):
+    def load_data_build_indices_from_file(self, file_path):
 
         with open(file_path, "r") as f:
             data = json.load(f)
@@ -102,3 +108,21 @@ class Entity:
                     f"Cannot find {key} in the data point: {data_point}. Every {self.entity_name} should at least have {mandatory_keys}"
                 )
         return
+
+    def get_data_from_primary_keys(self, search_keys):
+        if not isinstance(search_keys, list):
+            search_keys = [search_keys]
+        # matches = []
+        # for key in search_keys:
+
+        #     data_point = self.indices[self.primary_key].get(key, None)
+        #     print(key, data_point)
+
+        #     if data_point:
+        #         matches.append(data_point)
+        matches = (
+            self.indices[self.primary_key][key]
+            for key in search_keys
+            if self.indices[self.primary_key].get(key, None)
+        )
+        return matches
