@@ -1,7 +1,10 @@
 FROM python:3.7.6-alpine3.10 as base
 
 WORKDIR /zensearch
+
 # RUN apk add --update make
+RUN apk add --update bash
+
 RUN pip3 install pipenv==2018.11.26
 
 # Copying all the file in repo except the ones in .dockerignore
@@ -40,5 +43,5 @@ RUN safety check
 # The `Test` stage runs the application unit tests, the build will fail
 # if the tests fail.
 FROM test-base as Test
-RUN ./dev/test.sh
-ENTRYPOINT [ "./dev/test.sh"]
+RUN ./dev/test.sh .
+ENTRYPOINT [ "./dev/test.sh", "."]
