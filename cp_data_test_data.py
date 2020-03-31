@@ -38,4 +38,4 @@ def cp(src, dst):
 
 
 if __name__ == "__main__":
-    cp("./data/", "tests/")
+    cp("./data/", "tests/test_data")
