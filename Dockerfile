@@ -40,6 +40,5 @@ RUN safety check
 # The `Test` stage runs the application unit tests, the build will fail
 # if the tests fail.
 FROM test-base as Test
-RUN pytest -v
-CMD [ "-v" ]
-ENTRYPOINT [ "pytest"]
+RUN ./dev/test.sh
+ENTRYPOINT [ "./dev/test.sh"]
