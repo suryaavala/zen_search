@@ -9,11 +9,11 @@ RUN pip3 install pipenv==2018.11.26
 
 # Copying all the file in repo except the ones in .dockerignore
 COPY . .
-# pipenv install dependencies and fwfparser package, system wide without creating a venv
+# pipenv install dependencies and zensearch package, system wide without creating a venv
 RUN pipenv install --system --deploy
 
 # The `Prod` stage is push to dockerhub ang tagged as latest if all tests/checks pass in ci without failure - cleaning unnecessary files from base here
-# The resulting image will parse an example using fwfparser/__main__.py
+# The resulting image will parse an example using zensearch/__main__.py
 FROM base as Prod
 # RUN ls | grep -vE "example" | xargs rm -r
 RUN ls | grep -vE "zensearch|data" | xargs rm -r
