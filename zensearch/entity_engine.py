@@ -12,6 +12,7 @@ class Entity:
         self.entity_name = entity_name
         self.primary_key = primary_key
         self.indices = {self.primary_key: {}}
+        # self.data = []
 
     def _build_indices(self, data):
         if data == []:
@@ -26,13 +27,6 @@ class Entity:
             primary_key = data_point[self.primary_key]
 
             for field in data_point:
-                # if the data point's field value is unhashable, then raise an TypeError
-                if not isinstance(
-                    data_point[field], collections.abc.Hashable
-                ) and not isinstance(data_point[field], list):
-                    raise TypeError(
-                        f"Unhashable value {data_point[field]} found in field: {field} for data point: {data_point}"
-                    )
                 # if field is primary_key, then we link the data point itself directly to the (primary_key) index key (=data point primary key value)
                 if field == self.primary_key:
                     # throw an error if/when a primary key has already been seen
@@ -41,9 +35,15 @@ class Entity:
                             f"Duplicate primary key value: {data_point[field]} found in the data point. It's been assumed that every entity should have a unique set of primary keys"
                         )
                     self.indices[field][str(data_point[field])] = data_point
-                    continue
+                # if the data point's field value is unhashable, then raise an TypeError
+                elif not isinstance(
+                    data_point[field], collections.abc.Hashable
+                ) and not isinstance(data_point[field], list):
+                    raise TypeError(
+                        f"Unhashable value {data_point[field]} found in field: {field} for data point: {data_point}"
+                    )
                 # if field is a list in itself, then we flatten it and use each of those item items as a value
-                if isinstance(data_point[field], list) or isinstance(
+                elif isinstance(data_point[field], list) or isinstance(
                     data_point[field], tuple
                 ):
                     if len(data_point[field]) == 0:
@@ -95,7 +95,7 @@ class Entity:
             # raise SyntaxWarning(
             #     "Recieved a dict, so assuming it is a data point. Data inside the file should be a list of data points(dicts)."
             # )
-
+        # self.data = data
         self._build_indices(data)
         return
 

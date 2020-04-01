@@ -283,11 +283,33 @@ class TestEntityEngineBuildIndices:
         ]
 
         for inp in test_in_data:
-            print(inp)
             entity = Entity("ticket")
             with pytest.raises(TypeError) as error:
                 entity._build_indices(inp)
             assert "Unhashable value" in str(error.value)
+
+        assert True
+
+    def test_build_pkey_index_unhashable(self):
+        """Unhashable values in data point's primary key index should not throw TypeErrors as they are being stringified
+        """
+        test_in_data = [
+            [{"_id": {1: 1}}],
+            [{"_id": {1}}],
+            [{"_id": [1]}],
+        ]
+
+        test_out_data = [
+            {"_id": {"{1: 1}": {"_id": {1: 1}}}},
+            {"_id": {"{1}": {"_id": {1}}}},
+            {"_id": {"[1]": {"_id": [1]}}},
+        ]
+
+        for inp, out in zip(test_in_data, test_out_data):
+            entity = Entity("ticket")
+            print(inp)
+            entity._build_indices(inp)
+            assert entity.indices == out
 
         assert True
 
