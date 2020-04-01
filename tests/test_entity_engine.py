@@ -111,9 +111,9 @@ class TestEntityEngineLoadData:
         """
         test_io = {
             "[]": {"_id": {}},
-            '{"_id": 1}': {"_id": {1: {"_id": 1}}},
-            '[{"_id": 1}]': {"_id": {1: {"_id": 1}}},
-            '[{"_id": 1, "d": 2}]': {"_id": {1: {"_id": 1, "d": 2}}, "d": {2: [1]}},
+            '{"_id": 1}': {"_id": {"1": {"_id": 1}}},
+            '[{"_id": 1}]': {"_id": {"1": {"_id": 1}}},
+            '[{"_id": 1, "d": 2}]': {"_id": {"1": {"_id": 1, "d": 2}}, "d": {2: [1]}},
         }
         for in_data in test_io:
             tmp_file_name = f"{tmpdir}/invalid_json.json"
@@ -135,7 +135,7 @@ class TestEntityEngineLoadData:
         test_data = '[{"cid": 1}]'
         test_primary_key = "cid"
 
-        expected_index = {"cid": {1: {"cid": 1}}}
+        expected_index = {"cid": {"1": {"cid": 1}}}
 
         write_to_file(test_data, tmp_file_name)
         entity = Entity("user", "cid")
@@ -192,9 +192,12 @@ class TestEntityEngineBuildIndices:
         ]
         test_ticket_out_data = [
             {"_id": {}},
-            {"_id": {1: {"_id": 1, "name": "surya"}}, "name": {"surya": [1]}},
+            {"_id": {"1": {"_id": 1, "name": "surya"}}, "name": {"surya": [1]}},
             {
-                "_id": {1: {"_id": 1, "name": "surya"}, 2: {"_id": 2, "name": "surya"}},
+                "_id": {
+                    "1": {"_id": 1, "name": "surya"},
+                    "2": {"_id": 2, "name": "surya"},
+                },
                 "name": {"surya": [1, 2]},
             },
             {
@@ -239,7 +242,7 @@ class TestEntityEngineBuildIndices:
         test_out_data = [
             {"_id": {"": {"_id": ""}}},
             {"_id": {" ": {"_id": " "}}},
-            {"_id": {1: {"_id": 1, "tags": []}}, "tags": {"": [1]}},
+            {"_id": {"1": {"_id": 1, "tags": []}}, "tags": {"": [1]}},
             {"_id": {"": {"_id": "", "name": "surya"}}, "name": {"surya": [""]}},
         ]
 
@@ -258,10 +261,10 @@ class TestEntityEngineBuildIndices:
         ]
         test_out_data = [
             {
-                "_id": {1: {"_id": 1, "tags": ["tag1", "tag2"]}},
+                "_id": {"1": {"_id": 1, "tags": ["tag1", "tag2"]}},
                 "tags": {"tag1": [1], "tag2": [1]},
             },
-            {"_id": {1: {"_id": 1, "tags": []}}, "tags": {"": [1]}},
+            {"_id": {"1": {"_id": 1, "tags": []}}, "tags": {"": [1]}},
         ]
 
         for inp, out in zip(test_in_data, test_out_data):
@@ -340,18 +343,25 @@ class TestEntityEngineDataFromPrimaryKeys:
         assert [] == list(entity.get_data_from_primary_keys(0))
 
     def test_entity_match_python_equality_paradox(self):
+        """1.00 is treated same as 1.0 in python so having both of them in the code would raise an error
+        TODO: Should we support this functionality
+        """
         users = [
             {"_id": 1, "name": "one"},
-            {"_id": 2, "name": "two"},
-            {"_id": 3, "name": "three"},
+            {"_id": 1.0, "name": "two"},
+            {"_id": True, "name": "three"},
+            {"_id": 1.01, "name": "four"},
         ]
-        same = [1, 1.0, True, 1.00]
+        same = [1, 1.0, True, 1.01]
         entity = get_entity_from_formatted_data("user", users)
 
-        assert [users[0]] == list(entity.get_data_from_primary_keys(same[0]))
-        assert [users[0]] == list(entity.get_data_from_primary_keys(same[1]))
-        assert [users[0]] == list(entity.get_data_from_primary_keys(same[2]))
-        assert [users[0]] == list(entity.get_data_from_primary_keys(same[3]))
+        for search_term, expected_out in zip(same, users):
+            print(search_term)
+            assert [expected_out] == list(
+                entity.get_data_from_primary_keys(search_term)
+            )
+
+        assert True
 
     def test_entity_match_get_empty(self):
         users = [

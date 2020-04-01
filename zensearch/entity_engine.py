@@ -36,11 +36,11 @@ class Entity:
                 # if field is primary_key, then we link the data point itself directly to the (primary_key) index key (=data point primary key value)
                 if field == self.primary_key:
                     # throw an error if/when a primary key has already been seen
-                    if self.indices[field].get(data_point[field], None):
+                    if self.indices[field].get(str(data_point[field]), None):
                         raise DuplicatePrimaryKeyError(
                             f"Duplicate primary key value: {data_point[field]} found in the data point. It's been assumed that every entity should have a unique set of primary keys"
                         )
-                    self.indices[field][data_point[field]] = data_point
+                    self.indices[field][str(data_point[field])] = data_point
                     continue
                 # if field is a list in itself, then we flatten it and use each of those item items as a value
                 if isinstance(data_point[field], list) or isinstance(
@@ -121,8 +121,9 @@ class Entity:
         #     if data_point:
         #         matches.append(data_point)
         matches = (
-            self.indices[self.primary_key][key]
+            self.indices[self.primary_key][str(key)]
             for key in search_keys
-            if self.indices[self.primary_key].get(key, None)
+            if self.indices[self.primary_key].get(str(key), None)
+            and self.indices[self.primary_key][str(key)][self.primary_key] == key
         )
         return matches

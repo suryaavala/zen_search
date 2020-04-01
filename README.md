@@ -9,13 +9,14 @@
 4.  Search on an entity triggers search for results of that entity type and additional searches in other entities (based on related keys)
     1. example, search on `user._id` triggers a search on `ticket.submitter_id == user._id && ticket.assignee_id == user._id` and `org.id == user.organization_id`
 
-#### Improvements / Things to think about
+#### Improvements / Things to think about / Notes
 
     1. Instead of linking the entire data element to the index we could just link the primary key and still be able to do constant time searches!
     2. How do insertions / deletions and updates work after indices are built? Maybe add functionality to do that if time permits - Assumption 1
     3. How does search work with multiple constrains? example: search for users who have a tag "Springville", in locale "en-AU", in timezone "Italy"? - Assumption 2
     4. Building index for the primary key as well, which is redundant
     5. Don't have to build indices on fields that are going to be unique
+    6. primary keys `1, True, 1.0` will lead to collisions and undesirable behavior in python - casting all primary keys to string just does the trick here. P.S. `1.0, 1.00` are equal in python, so as soon as a key is `1.00`, python makes it `1.0` so if we really want `1.00` it has to be string in the data.
 
 #### Assumptions
 
@@ -35,6 +36,7 @@
     1. Must need to traverse the entire data while building indices
     2. More memory required a multiple indices are kept in memory
     3. Fields with Unhashable values can't be indexed
+    4. collisions in `dict()` (indices)
 
 #### Alternative Approaches
 
