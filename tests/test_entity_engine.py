@@ -2,8 +2,10 @@ import json
 import os
 
 import pytest
+
 from zensearch.entity_engine import Entity
-from zensearch.exceptions import PrimaryKeyNotFoundError, DuplicatePrimaryKeyError
+from zensearch.exceptions import (DuplicatePrimaryKeyError,
+                                  PrimaryKeyNotFoundError)
 
 
 def write_to_file(content, file_name):

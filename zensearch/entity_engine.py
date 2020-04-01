@@ -1,6 +1,8 @@
-import json
 import collections
-from zensearch.exceptions import PrimaryKeyNotFoundError, DuplicatePrimaryKeyError
+import json
+
+from zensearch.exceptions import (DuplicatePrimaryKeyError,
+                                  PrimaryKeyNotFoundError)
 
 
 class Entity:

@@ -1,6 +1,7 @@
 import pytest
 
-from zensearch.exceptions import PrimaryKeyNotFoundError, DuplicatePrimaryKeyError
+from zensearch.exceptions import (DuplicatePrimaryKeyError,
+                                  PrimaryKeyNotFoundError)
 
 
 class TestPrimaryKeyNotFoundError:
