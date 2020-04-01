@@ -14,7 +14,7 @@ def write_to_file(content, file_name):
 
 def get_entity_with_data_indices(entity_name):
     """Instantiates and returns an Entity object of entity_name after loading data (from
-    inferred test data file) and building indices
+    inferred test data file) and building _indices
     
     Args:
         entity_name (str): One of user, organization, ticket
@@ -24,7 +24,7 @@ def get_entity_with_data_indices(entity_name):
     """
     data_file_name = f"tests/test_data/test_data_import_{entity_name}s.json"
     entity = Entity(entity_name)
-    entity.load_data_build_indices_from_file(data_file_name)
+    entity.load_data_build_indices(data_file_name)
     return entity
 
 
@@ -38,7 +38,7 @@ def get_all_entities(entity_names=["user", "ticket", "organization"]):
 
 def get_entity_from_formatted_data(entity_name, data):
     entity = Entity(entity_name)
-    entity._build_indices(data)
+    entity.load_data_build_indices(data)
     return entity
 
 
@@ -48,15 +48,16 @@ class TestEntityEngine:
                 a primary key
                 alteast an index on primary key
                 _build_indices 
-                load_data_build_indices_from_file
+                load_data_build_indices
                 search
         """
         entity = Entity("user")
 
         assert entity.primary_key == "_id"
-        assert entity.indices == {"_id": {}}
+        assert entity._indices == {"_id": {}}
+        assert entity._data == []
         assert hasattr(entity, "_build_indices")
-        assert hasattr(entity, "load_data_build_indices_from_file")
+        assert hasattr(entity, "load_data_build_indices")
         assert hasattr(entity, "search")
 
 
@@ -65,10 +66,12 @@ class TestEntityEngineLoadData:
         """Test for a FileNotFoundError when an empty string or invalid path to file is given
         """
         entity = Entity("user")
+        invalid_files = ["a", "nofile.txt", "{}", "set", "True", "None"]
 
-        with pytest.raises(FileNotFoundError) as error:
-            entity.load_data_build_indices_from_file("nofile.txt")
-        assert "[Errno 2] No such file or directory:" in str(error.value)
+        for invalid_file_name in invalid_files:
+            with pytest.raises(FileNotFoundError) as error:
+                entity.load_data_build_indices(invalid_file_name)
+            assert "[Errno 2] No such file or directory:" in str(error.value)
 
     def test_entity_invalid_json_structure(self, tmpdir):
         """Invalid json in any of the entity files should throw a Json Decode Error
@@ -80,7 +83,7 @@ class TestEntityEngineLoadData:
             entity = Entity("user")
 
             with pytest.raises(json.decoder.JSONDecodeError):
-                entity.load_data_build_indices_from_file(tmp_file_name)
+                entity.load_data_build_indices(tmp_file_name)
 
             assert True
 
@@ -100,12 +103,12 @@ class TestEntityEngineLoadData:
             entity = Entity("user")
 
             with pytest.raises(PrimaryKeyNotFoundError) as error:
-                entity.load_data_build_indices_from_file(tmp_file_name)
+                entity.load_data_build_indices(tmp_file_name)
             assert "Cannot find _id in the data point:" in str(error.value)
 
         assert True
 
-    def test_entity_valid_data(self, tmpdir):
+    def test_entity_valid_data_in_file(self, tmpdir):
         """Testing with valid data should result in expected output, empty data [] should result in empty index
         {} is not valid as it doesn't have the primary key in it
         """
@@ -121,9 +124,30 @@ class TestEntityEngineLoadData:
 
             entity = Entity("user")
 
-            entity.load_data_build_indices_from_file(tmp_file_name)
+            entity.load_data_build_indices(tmp_file_name)
 
-            assert test_io[in_data] == entity.indices
+            assert test_io[in_data] == entity._indices
+
+        assert True
+
+    def test_entity_valid_data_no_file(self, tmpdir):
+        """Testing with valid data should result in expected output, empty data [] should result in empty index
+        {} is not valid as it doesn't have the primary key in it
+        """
+        test_in_data = [[], {"_id": 1}, [{"_id": 1}], [{"_id": 1, "d": 2}]]
+        test_out_data = [
+            {"_id": {}},
+            {"_id": {"1": {"_id": 1}}},
+            {"_id": {"1": {"_id": 1}}},
+            {"_id": {"1": {"_id": 1, "d": 2}}, "d": {2: [1]}},
+        ]
+        for inp, out in zip(test_in_data, test_out_data):
+
+            entity = Entity("user")
+
+            entity.load_data_build_indices(inp)
+
+            assert out == entity._indices
 
         assert True
 
@@ -139,29 +163,29 @@ class TestEntityEngineLoadData:
 
         write_to_file(test_data, tmp_file_name)
         entity = Entity("user", "cid")
-        entity.load_data_build_indices_from_file(tmp_file_name)
+        entity.load_data_build_indices(tmp_file_name)
 
         assert test_primary_key == entity.primary_key
-        assert expected_index == entity.indices
+        assert expected_index == entity._indices
 
-
-class TestEntityEngineBuildIndices:
-    def test_build_index_nonlist_data(self):
-        """Valid data = [], [{"primary_key": }]
+    def test_build_load_invalid_data_type(self):
+        """Valid data = [], [{"primary_key": }], 'path/to/file'
         Invalid data should throw a value error
         """
-        invalid_input_data = [1, "a", {}, (), True, None, Entity("user")]
+        invalid_input_data = [1, {1}, (), True, None, Entity("user")]
 
         for invalid_data_point in invalid_input_data:
             entity = Entity("ticket")
-            with pytest.raises(ValueError) as error:
-                entity._build_indices(invalid_data_point)
+            with pytest.raises(TypeError) as error:
+                entity.load_data_build_indices(invalid_data_point)
             assert (
-                "Invalid entity data give found while trying to build indices. Data given to build indices should be a list() of dict()"
+                "Data to load should be one of file path as str(), data point as dict() or data as list of data point()"
                 == str(error.value)
             )
         assert True
 
+
+class TestEntityEngineBuildIndices:
     def test_build_index_missing_primary_key(self):
         """Missing primary key should throw an error
         """
@@ -170,11 +194,11 @@ class TestEntityEngineBuildIndices:
         for no_pkey in no_pkey_data:
             entity = Entity("ticket")
             with pytest.raises(PrimaryKeyNotFoundError):
-                entity._build_indices(no_pkey)
+                entity.load_data_build_indices(no_pkey)
         assert True
 
     def test_build_index_valid_data(self):
-        """Valid data should return valid indices
+        """Valid data should return valid _indices
         if the data is
             - [] it should result in vanilla index
         """
@@ -223,9 +247,9 @@ class TestEntityEngineBuildIndices:
 
         for inp, out in zip(test_ticket_in_data, test_ticket_out_data):
             entity = Entity("ticket")
-            entity._build_indices(inp)
+            entity.load_data_build_indices(inp)
 
-            assert out == entity.indices
+            assert out == entity._indices
 
         assert True
 
@@ -248,8 +272,8 @@ class TestEntityEngineBuildIndices:
 
         for inp, out in zip(test_in_data, test_out_data):
             entity = Entity("organization")
-            entity._build_indices(inp)
-            assert out == entity.indices
+            entity.load_data_build_indices(inp)
+            assert out == entity._indices
         assert True
 
     def test_build_index_tags(self):
@@ -269,8 +293,8 @@ class TestEntityEngineBuildIndices:
 
         for inp, out in zip(test_in_data, test_out_data):
             entity = Entity("ticket")
-            entity._build_indices(inp)
-            assert out == entity.indices
+            entity.load_data_build_indices(inp)
+            assert out == entity._indices
 
         assert True
 
@@ -285,7 +309,7 @@ class TestEntityEngineBuildIndices:
         for inp in test_in_data:
             entity = Entity("ticket")
             with pytest.raises(TypeError) as error:
-                entity._build_indices(inp)
+                entity.load_data_build_indices(inp)
             assert "Unhashable value" in str(error.value)
 
         assert True
@@ -308,8 +332,8 @@ class TestEntityEngineBuildIndices:
         for inp, out in zip(test_in_data, test_out_data):
             entity = Entity("ticket")
             print(inp)
-            entity._build_indices(inp)
-            assert entity.indices == out
+            entity.load_data_build_indices(inp)
+            assert entity._indices == out
 
         assert True
 
@@ -320,7 +344,7 @@ class TestEntityEngineBuildIndices:
         for dup in test_in_data:
             entity = Entity("user")
             with pytest.raises(DuplicatePrimaryKeyError) as error:
-                entity._build_indices(test_in_data)
+                entity.load_data_build_indices(test_in_data)
                 assert "Duplicate primary key value: " in str(error.value)
         assert True
 
