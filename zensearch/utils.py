@@ -1,10 +1,14 @@
-from zensearch.config import RELATIONSHIPS
+from zensearch.config import RELATIONSHIPS, ENTITY_TITLE_FIELDS
 from zensearch.entity_engine import Entity
 import os
 
 
 def get_entity_relationships(entity_name):
     return RELATIONSHIPS[entity_name]
+
+
+def get_entity_titile(entity_name):
+    return ENTITY_TITLE_FIELDS[entity_name]
 
 
 def _auto_find_file_names(entity_names, datadir):

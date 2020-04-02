@@ -4,6 +4,7 @@ from zensearch.utils import (
     get_setup_entities,
     strtobool,
     get_user_input,
+    get_entity_titile,
 )
 from zensearch.config import (
     MESSAGE_HOME,
@@ -83,9 +84,40 @@ class ZendeskSearch:
 
     def __search_related_and_print(self, entity_name, matches):
         for match in matches:
-            for field in match:
-                print("{0:28}  {1}".format(field, match[field]))
-            # related_matches = self.entities_dict[]
+            self.__print_a_match(match)
+            self.__search_related_from_match(entity_name, match)
+        return
+
+    def __search_related_from_match(self, entity_name, match):
+        relationships_with_other_entities = get_entity_relationships(entity_name)
+        for related_entity in relationships_with_other_entities:
+            for relationship in relationships_with_other_entities[related_entity]:
+                search_term = relationship["search_key_in_dependant"]
+                search_value = match[relationship["search_key_in_current"]]
+                matches = self.entities_dict[related_entity].search(
+                    search_term, strtobool(search_value)
+                )
+                self.__print_dependant_matches(
+                    matches,
+                    related_entity,
+                    default_field_phrase=relationship["output_phrase"],
+                )
+        return
+
+    def __print_dependant_matches(self, matches, current_entity, default_field_phrase):
+        title_field = get_entity_titile(current_entity)
+        for m_number, match in enumerate(matches):
+            # empty_spaces = 28 - len(str(m_number))
+            if m_number != 0:
+                print_field_phrase = f"{default_field_phrase}_{m_number+1}"
+            else:
+                print_field_phrase = default_field_phrase
+            print("{0:28}  {1}".format(print_field_phrase, match[title_field]))
+        return
+
+    def __print_a_match(self, match):
+        for field in match:
+            print("{0:28}  {1}".format(field, match[field]))
         return
 
     def _print_searchable_fields(self):

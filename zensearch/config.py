@@ -11,7 +11,7 @@ RELATIONSHIPS = {
             {
                 "search_key_in_dependant": "assignee_id",
                 "search_key_in_current": "_id",
-                "output_phrase": "assigned_ticket",
+                "output_phrase": "ticket_assigned",
             },
             {
                 "search_key_in_dependant": "submitter_id",
@@ -30,14 +30,14 @@ RELATIONSHIPS = {
         ],
         "user": [
             {
-                "search_key_in_dependant": "assignee_id",
-                "search_key_in_current": "_id",
-                "output_phrase": "assigned_ticket",
+                "search_key_in_dependant": "_id",
+                "search_key_in_current": "assignee_id",
+                "output_phrase": "assigned_to",
             },
             {
-                "search_key_in_dependant": "submitter_id",
-                "search_key_in_current": "_id",
-                "output_phrase": "submitted_ticket",
+                "search_key_in_dependant": "_id",
+                "search_key_in_current": "submitter_id",
+                "output_phrase": "submitted_by",
             },
         ],
     },
@@ -59,6 +59,7 @@ RELATIONSHIPS = {
     },
 }
 
+ENTITY_TITLE_FIELDS = {"user": "name", "organization": "name", "ticket": "subject"}
 
 MESSAGE_HOME = """-------------------------------------------------
 Welcome to Zendesk Search
