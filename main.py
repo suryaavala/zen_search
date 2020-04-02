@@ -18,7 +18,7 @@
 # ) as f:
 #     json.dump(idz, f)
 
-from zensearch.app import ZendeskSearch
+from zensearch.zensearch import ZendeskSearch
 
 
 def main(*args, **kwargs):

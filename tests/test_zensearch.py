@@ -1,4 +1,4 @@
-from zensearch.app import ZendeskSearch
+from zensearch.zensearch import ZendeskSearch
 from zensearch.config import (
     MESSAGE_HOME,
     MESSAGE_SELECT_ENTITY,
