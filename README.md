@@ -1,3 +1,27 @@
+[![Build](https://github.com/suryaavala/zen_search/workflows/Test%20Build%20and%20Publish/badge.svg)](https://github.com/suryaavala/zen_search/workflows/Test%20Build%20and%20Publish/badge.svg) [![Python 3.7.6](https://img.shields.io/badge/python-v3.7-blue.svg)](https://www.python.org/downloads/release/python-376/)
+
+## zensearch
+
+A python implementation of a basic user ticketing system search
+
+### Quick Start
+
+#### 1. Using Docker
+
+1.  docker
+2.  log into dockerhub `docker login`
+3.  `docker pull suryaavala/zensearch:latest`
+4.  `docker run -it suryaavala/zensearch:latest`
+    1.  Advanced usage
+
+#### 2. Running Locally
+
+1. Uses [Python 3.7.6](https://www.python.org/downloads/release/python-376/)
+2. `git clone git@github.com:suryaavala/zen_search.git`
+3. `cd zen_search`
+4. `python3 main.py`
+   1. Advanced usage
+
 ### Approach
 
 1.  Every `entity` (user, ticket, organisation) is represented by their own class with objects of this class representing individual items.

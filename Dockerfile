@@ -16,9 +16,9 @@ RUN pipenv install --system --deploy
 # The resulting image will parse an example using zensearch/__main__.py
 FROM base as Prod
 # RUN ls | grep -vE "example" | xargs rm -r
-RUN ls | grep -vE "zensearch|data" | xargs rm -r
+RUN ls | grep -vE "zensearch|data|main" | xargs rm -r
 
-ENTRYPOINT [ "python3", "zensearch/search.py" ]
+ENTRYPOINT [ "python3", "main.py" ]
 
 # The `Security` stage checks Prod container image for vulnerabilities using the Aqua MicroScanner. This requires providing a build-arg with your MicroScanner token
 # See: https://github.com/aquasecurity/microscanner
