@@ -21,9 +21,7 @@ from time import sleep
 
 class ZendeskSearch:
     def __init__(
-        self,
-        entity_names=["user", "ticket", "organization"],
-        data_dir="../data/import/",
+        self, entity_names, data_dir,
     ):
         self.entities_dict = get_setup_entities(entity_names, data_dir)
         self.entity_selection_to_name = {

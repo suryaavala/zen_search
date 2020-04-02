@@ -22,7 +22,9 @@ from zensearch.zensearch import ZendeskSearch
 
 
 def main(*args, **kwargs):
-    zen = ZendeskSearch(data_dir="./data/import/")
+    zen = ZendeskSearch(
+        entity_names=["user", "ticket", "organization"], data_dir="./data/import/"
+    )
     zen.cli()
     return
 
