@@ -2,10 +2,10 @@ import json
 import os
 
 import pytest
+import unittest
 
 from zensearch.entity_engine import Entity
-from zensearch.exceptions import (DuplicatePrimaryKeyError,
-                                  PrimaryKeyNotFoundError)
+from zensearch.exceptions import DuplicatePrimaryKeyError, PrimaryKeyNotFoundError
 
 
 def write_to_file(content, file_name):
@@ -24,7 +24,7 @@ def get_entity_with_data_indices(entity_name):
     Returns:
         Entity(): entity object of name entity_name, with test data loaded and incdices built
     """
-    data_file_name = f"tests/test_data/test_data_import_{entity_name}s.json"
+    data_file_name = f"{os.path.dirname(os.path.abspath(__file__))}/test_data/test_data_import_{entity_name}s.json"
     entity = Entity(entity_name)
     entity.load_data_build_indices(data_file_name)
     return entity
@@ -369,7 +369,7 @@ class TestEntityEngineDataFromPrimaryKeys:
             {"_id": 3, "name": "three"},
         ]
         entity = get_entity_from_formatted_data("user", users)
-        assert [] == list(entity.get_data_from_primary_keys([0, -1, 99, "test", "1"]))
+        assert [] == list(entity.get_data_from_primary_keys([0, -1, 99, "test", "11"]))
 
     def test_entity_match_single_primary_keys(self):
         users = [

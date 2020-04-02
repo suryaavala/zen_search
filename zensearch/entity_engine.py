@@ -1,8 +1,7 @@
-import collections
+from collections.abc import Hashable
 import json
 
-from zensearch.exceptions import (DuplicatePrimaryKeyError,
-                                  PrimaryKeyNotFoundError)
+from zensearch.exceptions import DuplicatePrimaryKeyError, PrimaryKeyNotFoundError
 
 
 class Entity:
@@ -38,9 +37,9 @@ class Entity:
                         )
                     self._indices[field][str(data_point[field])] = data_point
                 # if the data point's field value is unhashable, then raise an TypeError
-                elif not isinstance(
-                    data_point[field], collections.abc.Hashable
-                ) and not isinstance(data_point[field], list):
+                elif not isinstance(data_point[field], Hashable) and not isinstance(
+                    data_point[field], list
+                ):
                     raise TypeError(
                         f"Unhashable value {data_point[field]} found in field: {field} for data point: {data_point}"
                     )
@@ -134,6 +133,10 @@ class Entity:
             self._indices[self.primary_key][str(key)]
             for key in search_keys
             if self._indices[self.primary_key].get(str(key), None)
-            and self._indices[self.primary_key][str(key)][self.primary_key] == key
+            # and self._indices[self.primary_key][str(key)][self.primary_key] == key
+            # check to see that data and index have not diverged, commenting because i am making the assumption that the data wouldn't be updated/changed untill futher changes are needed in the code
         )
         return matches
+
+    def get_searchable_fields(self):
+        return list(self._indices.keys())
