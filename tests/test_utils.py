@@ -2,7 +2,9 @@ from zensearch.config import RELATIONSHIPS
 from zensearch.utils import (
     get_entity_relationships,
     get_setup_entities,
+    get_entity_title,
     _auto_find_file_names,
+    strtobool,
 )
 from zensearch.entity_engine import Entity
 import pytest
@@ -14,12 +16,46 @@ def get_entity_names():
     return ["user", "ticket", "organization"]
 
 
-class TestSearch:
+class TestMiscUtils:
     def test_entity_relationships(self):
         for entity in RELATIONSHIPS:
             entity_relationship = get_entity_relationships(entity)
             assert RELATIONSHIPS[entity] == entity_relationship
         assert True
+
+    def test_entity_titles(self):
+        for entity in RELATIONSHIPS:
+            title = get_entity_title(entity)
+            if entity == "ticket":
+                assert title == "subject"
+            else:
+                assert title == "name"
+        assert True
+
+    def test_strtobool_non_bool(self):
+        non_bool_strings = [
+            "TRUE",
+            "FALSE",
+            "",
+            True,
+            False,
+            1,
+            None,
+            -1,
+            0.1,
+            0,
+            "Surya Avala",
+        ]
+
+        for non_bool in non_bool_strings:
+            assert non_bool == strtobool(non_bool)
+
+    @pytest.mark.parametrize(
+        "bools, expected",
+        [("True", True), ("true", True), ("false", False), ("False", False)],
+    )
+    def test_strtobool_bools(self, bools, expected):
+        assert expected == strtobool(bools)
 
 
 class TestSetupEntities:
@@ -94,3 +130,15 @@ class TestSetupEntities:
         with pytest.raises(LookupError) as error:
             _auto_find_file_names(keyword, tmpdir)
         assert f"Multiple files with keyword" in str(error.value)
+
+    def test_setup_entities_invalid_dir(self, get_entity_names):
+
+        invalid_dirs = ["not/valid/", "test/test", "none", "1", ""]
+
+        for invalid in invalid_dirs:
+            with pytest.raises(TypeError) as error:
+                get_setup_entities(get_entity_names, data_files=invalid)
+            assert (
+                "Invalid data_files given. data_files should be a directory path to files or list() of file paths themselves"
+                == str(error.value)
+            )

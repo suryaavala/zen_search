@@ -4,7 +4,8 @@ from zensearch.utils import (
     get_setup_entities,
     strtobool,
     get_user_input,
-    get_entity_titile,
+    get_entity_title,
+    get_related_match_string,
 )
 from zensearch.config import (
     MESSAGE_HOME,
@@ -24,114 +25,51 @@ class ZendeskSearch:
         self, entity_names, data_dir,
     ):
         self.entities_dict = get_setup_entities(entity_names, data_dir)
-        self.entity_selection_to_name = {
-            "1": "user",
-            "2": "ticket",
-            "3": "organization",
-        }
-        self.valid_choices = {"home": ["1", "2"], "entity": ["1", "2", "3"]}
 
-    def cli(self):
-        while True:
-            home_selection = get_user_input(MESSAGE_HOME)
-            if self._is_valid_input_or_quit(home_selection, self.valid_choices["home"]):
-                if home_selection == "1":
-                    self._select_entity()
-                elif home_selection == "2":
-                    self._print_searchable_fields()
-            else:
-                print(MESSAGE_INVALID_SELECTION)
-                sleep(SLEEP_TIMER)
+    def get_all_matches(self, search_entity, search_term, search_value):
+        current_entity_matches = self._get_matches_in_entity(
+            search_entity, search_term, strtobool(search_value)
+        )
+        return (
+            self._find_update_related_matches(search_entity, match)
+            for match in current_entity_matches
+        )
 
-        return
+    def _get_matches_in_entity(self, search_entity, search_term, search_value):
+        return self.entities_dict[search_entity].search(search_term, search_value)
 
-    def _select_entity(self):
-        entity_selection = get_user_input(MESSAGE_SELECT_ENTITY)
-        if self._is_valid_input_or_quit(
-            entity_selection, self.entity_selection_to_name.keys()
-        ):
-            self._select_term(self.entity_selection_to_name[entity_selection])
-        else:
-            print(MESSAGE_INVALID_SELECTION)
-            sleep(SLEEP_TIMER)
-        return
-
-    def _select_term(self, entity_name):
-        search_term_selection = get_user_input(MESSAGE_SELECT_TERM)
-        if self._is_valid_input_or_quit(
-            search_term_selection,
-            self.entities_dict[entity_name].get_searchable_fields(),
-        ):
-            self._select_value(entity_name, search_term_selection)
-        else:
-            print(MESSAGE_INVALID_SELECTION)
-            sleep(SLEEP_TIMER)
-        return
-
-    def _select_value(self, entity_name, search_term):
-        search_value_selection = get_user_input(MESSAGE_SELECT_VALUE)
-        if self._is_valid_input_or_quit(search_value_selection, "*"):
-            matches = self.entities_dict[entity_name].search(
-                search_term, strtobool(search_value_selection)
+    def _find_update_related_matches(self, current_entity, match):
+        relationships_with_other_entities = get_entity_relationships(current_entity)
+        for relationship in relationships_with_other_entities:
+            search_entity = relationship["related_entity"]
+            search_term = relationship["search_key_in_dependant"]
+            search_value = match.get(relationship["search_key_in_current"], None)
+            related_matches = self._get_matches_in_entity(
+                search_entity, search_term, search_value
             )
-            self.__search_related_and_print(entity_name, matches)
-        else:
-            print(MESSAGE_INVALID_SELECTION)
-            sleep(SLEEP_TIMER)
-        return
+            self._update_match_with_related(
+                match, related_matches, search_entity, relationship["output_phrase"]
+            )
+        return match
 
-    def __search_related_and_print(self, entity_name, matches):
-        for match in matches:
-            self.__print_a_match(match)
-            self.__search_related_from_match(entity_name, match)
-        return
-
-    def __search_related_from_match(self, entity_name, match):
-        relationships_with_other_entities = get_entity_relationships(entity_name)
-        for related_entity in relationships_with_other_entities:
-            for relationship in relationships_with_other_entities[related_entity]:
-                search_term = relationship["search_key_in_dependant"]
-                search_value = match[relationship["search_key_in_current"]]
-                matches = self.entities_dict[related_entity].search(
-                    search_term, strtobool(search_value)
-                )
-                self.__print_dependant_matches(
-                    matches,
-                    related_entity,
-                    default_field_phrase=relationship["output_phrase"],
-                )
-        return
-
-    def __print_dependant_matches(self, matches, current_entity, default_field_phrase):
-        title_field = get_entity_titile(current_entity)
-        for m_number, match in enumerate(matches):
-            # empty_spaces = 28 - len(str(m_number))
-            if m_number != 0:
-                print_field_phrase = f"{default_field_phrase}_{m_number+1}"
+    def _update_match_with_related(
+        self, match, related_matches, related_entity, output_phrase
+    ):
+        title_field = get_entity_title(related_entity)
+        for match_number, related_match in enumerate(related_matches):
+            match_string = get_related_match_string(output_phrase, match_number)
+            if related_match.get(title_field, None) is None:
+                match[match_string] = related_match["_id"]
             else:
-                print_field_phrase = default_field_phrase
-            print("{0:28}  {1}".format(print_field_phrase, match[title_field]))
+                match[match_string] = related_match[title_field]
+
         return
 
-    def __print_a_match(self, match):
-        for field in match:
-            print("{0:28}  {1}".format(field, match[field]))
-        return
+    def _get_searchable_fields(self):
+        return {
+            entity_name: self.entities_dict[entity_name].get_searchable_fields()
+            for entity_name in self.entities_dict
+        }
 
-    def _print_searchable_fields(self):
-        for entity_name in self.entities_dict:
-            print(MESSAGE_DASHED_LINE)
-            print(f"Search {entity_name.title()}s with")
-            print("\n".join(self.entities_dict[entity_name].get_searchable_fields()))
-            print("\n")
-        return
-
-    def _is_valid_input_or_quit(self, selected, choices):
-        if selected == "quit":
-            sys.exit("Bye!")
-        elif selected in choices:
-            return True
-        elif choices == "*":
-            return True
-        else:
-            return False
+    def _get_entity_searchable_fields(self, entity_name):
+        return self.entities_dict[entity_name].get_searchable_fields()

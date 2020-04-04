@@ -2,6 +2,7 @@ from collections.abc import Hashable
 import json
 
 from zensearch.exceptions import DuplicatePrimaryKeyError, PrimaryKeyNotFoundError
+from copy import deepcopy
 
 
 class Entity:
@@ -130,7 +131,8 @@ class Entity:
         #     if data_point:
         #         matches.append(data_point)
         matches = (
-            self._indices[self.primary_key][str(key)]
+            deepcopy(self._indices[self.primary_key][str(key)])
+            # self._indices[self.primary_key][str(key)]
             for key in search_keys
             if self._indices[self.primary_key].get(str(key), None)
             # and self._indices[self.primary_key][str(key)][self.primary_key] == key

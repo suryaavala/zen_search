@@ -7,7 +7,7 @@ def get_entity_relationships(entity_name):
     return RELATIONSHIPS[entity_name]
 
 
-def get_entity_titile(entity_name):
+def get_entity_title(entity_name):
     return ENTITY_TITLE_FIELDS[entity_name]
 
 
@@ -65,4 +65,11 @@ def strtobool(value):
 
 
 def get_user_input(prompt):
-    return str(input(prompt))
+    return strtobool(str(input(prompt)))
+
+
+def get_related_match_string(core_pharse, match_number):
+    if match_number != 0:
+        return f"{core_pharse}_{match_number+1}"
+    else:
+        return core_pharse

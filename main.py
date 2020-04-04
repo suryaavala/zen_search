@@ -1,31 +1,15 @@
-# import json
-
-# from zensearch.entity_engine import Entity
-
-# with open(
-#     "/Users/surya/Development/surya/zen_search/specs/users.json", "r"
-# ) as user_file:
-#     data = json.load(user_file)
-
-# users = Entity("user")
-
-# users._build_indices(data)
-
-# idz = users.indices
-
-# with open(
-#     "/Users/surya/Development/surya/zen_search/data/out/user_update_index.json", "w",
-# ) as f:
-#     json.dump(idz, f)
-
-from zensearch.zensearch import ZendeskSearch
+from zensearch.cli import CLI
+import os
 
 
-def main(*args, **kwargs):
-    zen = ZendeskSearch(
-        entity_names=["user", "ticket", "organization"], data_dir="./data/import/"
+def main(nb_iterations=-1, *args, **kwargs):
+    cli = CLI(
+        entity_names=["user", "ticket", "organization"],
+        data_dir=os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "./data/import/"
+        ),
     )
-    zen.cli()
+    cli.run(nb_iterations)
     return
 
 
