@@ -67,6 +67,7 @@ A python implementation of a basic user ticketing system search - 🔎🕵️‍
 I have attempted to explain the basic approach I took. However, there's a good chance that I might have missed something (as I am writing this "quickly" after writing the code). Code is always (especially in this instance since I am only spending a limited amount of time on documentation) the best documentation/reference to see what's actually going on.
 
 My focus in the approach is titled towards quick/efficient lookups/searches rather than resource management.
+
 1.  Every `Entity` (user, ticket, organisation) is represented by their own `Entity()` object where json data from their respective file is loaded into `self._data` as list of dicts().
     1. example each `"user"` is a dictionary like `{ "_id": "", "url": "", "external_id": "", ...}` within `user._data` 
 2.  All the data is kept in memory all the time (since the data fits in memory according to the specs)
@@ -82,6 +83,8 @@ My focus in the approach is titled towards quick/efficient lookups/searches rath
     2.  If we are searching for a non primary key, then looking at the relevant entry in that index gives a list of primary keys and we'd have to return their entries from primary key index. So this is an `O(m)` time operation where `m` is the number of matches, worst case scenario where we get every data point matched leads to `O(n)` time complexity (where n is the number of data points)
 5. When it comes to related entries, it's just an abstraction on top of single `Entity()`
    1. example, search on `user._id` triggers a search on `ticket.submitter_id == user._id && ticket.assignee_id == user._id` && `organization.id == user.organization_id`
+
+<i>The solution for search implementation at it's core is doing a hash table lookup for the search value in the index for the search term</i>
 
 #### Improvements / Things to think about / Notes
 
@@ -118,14 +121,41 @@ My focus in the approach is titled towards quick/efficient lookups/searches rath
 
 -------------------------------------
 
-### Reports
+### More Info
+
+#### Modules / Classes
+ - [`zensearch.entity_engine.Entity`](./zensearch/entity_engine.py) - base class for entities (users/tickets/organziations) that holds data, manages indices and handles Entity level search
+ - [`zesearch.ZendeskSearch.py`](./zensearch/zensearch.py) - class that handles/orchestrates multiple (all) entities `Entity()` that handles search for related matches among entities, searchable fields etc..
+ - [`zendesk.cli.py`](./zensearch/cli.py) - class that handles command line interfaces for the application, that takes/processes user input, asks `ZendeskSearch` for results, formats and outputs them
+ - [`main.py`](./main.py) - entrypoint for the command line interface
+ - [`zensearch.exceptions`](./zensearch/exceptions.py) - custom exceptions for the application
+ - [`zensearch.config`](./zensearch/config.py) - configuration for the application, that hardcodes prompt messages, relationships between entities etc..
 
 #### Test Coverage
 
-[Coverage](./docs/test_coverage/index.html)
+[About 100% coverage](./docs/test_coverage/index.html)
 
 #### Performance
 
+[Not so scientific analysis](./Performance.ipynb)
+1. `CLI.run()` - with user selection (patched in the analysis) and output to stdout
+    <sub>(print statements in CLI have overwhelmed jupyter)</sub>
+    | Description                |     10000 users     | Spec Data (75 users) |
+    | -------------------------- | :-----------------: | -------------------: |
+    | Instantiation/Data Load    |        324ms        |               9.55ms |
+    | Number of Matches == 10000 | jupyter overwhelmed |                277ms |
+    | Number of Matches == 1     |       3.08ms        |               3.48ms |
+    
+   
+2. `ZendeskSearch().get_all_matches()` - that's used by `CLI.run()` under the hood - it returns a generator so I have added a `list()` on top of it to execute it and get accurate times
+    <sub>(doesn't print results - print statements are a huge bottleneck!)</sub>
+    | Description             | 10000 (10000 users) | Spec Data (75 users) |
+    | ----------------------- | :-----------------: | -------------------: |
+    | Instantiation/Data Load |        326ms        |                9.5ms |
+    | Matches == 10000        |        229ms        |               5.05ms |
+    | Matches == 1            |       47.2 µs       |              49.2 µs |
+
+For a more fine grained analysis I have run the [`cProfiler`](./profiler_scripty.py) (and optimized some parts of the code - like using `usjon` instead of `deepcopy` etc.). Links to pstats objects are below:
 1. [Pstats for `CLI.run()` with 10000 users and a search query that matches all of them ](./docs/performance/pstats_cli_run_10000)  
 2. [Pstats for `CLI.run()` with 75 users and a search query that matches all of them](./docs/performance/pstats_cli_run_75)
 3. [Pstats for `list(ZendeskSearch.get_all_matches())` with 10000 users and a search query that matches all of them](./docs/performance/pstats_zendesksearch_10000)
