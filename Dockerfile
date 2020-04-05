@@ -3,7 +3,14 @@ FROM python:3.7.6-alpine3.10 as base
 WORKDIR /zensearch
 
 # RUN apk add --update make
+RUN apk update
 RUN apk add --update bash
+# installing make, linux-header, gcc, g++ for ujson 
+RUN apk add --no-cache make
+RUN apk add --no-cache linux-headers
+RUN apk add --no-cache texinfo
+RUN apk add --no-cache gcc
+RUN apk add --no-cache g++
 
 RUN pip3 install pipenv==2018.11.26
 
