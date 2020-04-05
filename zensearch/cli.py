@@ -79,9 +79,9 @@ class CLI(ZendeskSearch):
             )
             self._print_matches(all_matches)
 
-        else:
-            print(MESSAGE_INVALID_SELECTION)
-            sleep(SLEEP_TIMER)
+        # else:
+        #     print(MESSAGE_INVALID_SELECTION)
+        #     sleep(SLEEP_TIMER)
         return
 
     def _is_valid_input_or_quit(self, selected, choices):

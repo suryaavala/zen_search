@@ -4,11 +4,21 @@ import os
 
 
 def get_entity_relationships(entity_name):
-    return RELATIONSHIPS[entity_name]
+    if entity_name in RELATIONSHIPS:
+        return RELATIONSHIPS[entity_name]
+    else:
+        raise KeyError(
+            "Entity name not found in Relationships. Look at RELATIONSHIPS in config.py"
+        )
 
 
 def get_entity_title(entity_name):
-    return ENTITY_TITLE_FIELDS[entity_name]
+    if entity_name in ENTITY_TITLE_FIELDS:
+        return ENTITY_TITLE_FIELDS[entity_name]
+    else:
+        raise KeyError(
+            "Entity name not found in entity title fields. Look at ENTITY_TITLE_FIELDS in config.py"
+        )
 
 
 def _auto_find_file_names(entity_names, datadir):

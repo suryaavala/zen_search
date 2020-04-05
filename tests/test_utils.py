@@ -32,6 +32,18 @@ class TestMiscUtils:
                 assert title == "name"
         assert True
 
+    def test_no_entity_name(self):
+        invalid_entity_name = ["not_an_entity", "users", 1, 0, True]
+
+        for inv in invalid_entity_name:
+            with pytest.raises(KeyError) as error:
+                get_entity_relationships(inv)
+                assert "Entity name not found in" in str(error.value)
+            with pytest.raises(KeyError) as error:
+                get_entity_title(inv)
+                assert "Entity name not found in" in str(error.value)
+        assert True
+
     def test_strtobool_non_bool(self):
         non_bool_strings = [
             "TRUE",

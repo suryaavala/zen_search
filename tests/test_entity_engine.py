@@ -84,7 +84,7 @@ class TestEntityEngineLoadData:
 
             entity = Entity("user")
 
-            with pytest.raises(json.decoder.JSONDecodeError):
+            with pytest.raises(ValueError):
                 entity.load_data_build_indices(tmp_file_name)
 
             assert True
@@ -425,6 +425,23 @@ class TestEntityEngineDataFromPrimaryKeys:
         assert [] == list(entity.get_data_from_primary_keys(""))
         assert [] == list(entity.get_data_from_primary_keys(None))
 
+    def test_entity_ground_data_integrity(self):
+        users = [
+            {"_id": 1, "name": "one"},
+            {"_id": 2, "name": "two"},
+            {"_id": 3, "name": "three"},
+        ]
+
+        entity = get_entity_from_formatted_data("user", users)
+
+        match = list(entity.get_data_from_primary_keys([1]))
+        match[0]["_id"] = 55
+        assert (
+            entity._indices["_id"]["1"]["_id"]
+            == entity._data[0]["_id"]
+            != match[0]["_id"]
+        )
+
 
 class TestEntityEngineSearch:
     def test_entity_search(self):
@@ -450,3 +467,34 @@ class TestEntityEngineSearch:
 
         assert [] == list(entity.search("name", "2"))
         assert [users[1]] == list(entity.search("name", "two"))
+
+    def test_entity_searchable_fields(self):
+        users = [
+            {"_id": 1, "name": "one"},
+            {"_id": 2, "name2": "two"},
+            {"_id": 3, "name3": "three"},
+            {"_id": 4, "name4": "three"},
+        ]
+        entity = get_entity_from_formatted_data("user", users)
+
+        assert set(entity.get_searchable_fields()) == set(
+            ["_id", "name", "name2", "name3", "name4",]
+        )
+
+    def test_entity_search_empty_fields(self):
+        users = [
+            {"_id": 1,},
+            {"_id": 2, "name": "testname"},
+            {"_id": 3, "alias": "testalias"},
+        ]
+        entity = get_entity_from_formatted_data("user", users)
+
+        assert list(entity.search("name", "")) == [
+            {"_id": 1},
+            {"_id": 3, "alias": "testalias"},
+        ]
+
+        assert list(entity.search("alias", "")) == [
+            {"_id": 1},
+            {"_id": 2, "name": "testname"},
+        ]

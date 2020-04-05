@@ -11,6 +11,7 @@ Pycco = "==0.6.0"
 snakeviz = "==2.0.1"
 
 [packages]
+ujson = "==1.35"
 
 [requires]
 python_version = "3.7"
