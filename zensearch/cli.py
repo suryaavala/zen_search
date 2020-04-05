@@ -115,4 +115,5 @@ class CLI(ZendeskSearch):
             for match in all_matches:
                 for field in match:
                     print("{0:28}  {1}".format(field, match[field]))
+                print(MESSAGE_DASHED_LINE)
             return
