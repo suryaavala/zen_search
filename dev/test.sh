@@ -11,4 +11,4 @@ pytest \
 -vvv \
 --verbose \
 --cov=$REL/zensearch $REL/tests \
---cov-report term-missing:skip-covered
+--cov-report term-missing
