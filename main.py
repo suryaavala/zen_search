@@ -1,5 +1,6 @@
-from zensearch.cli import CLI
 import os
+
+from zensearch.cli import CLI
 
 
 def main(nb_iterations=-1, data_dir="./data/import/", *args, **kwargs):

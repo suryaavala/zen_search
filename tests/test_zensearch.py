@@ -1,4 +1,7 @@
-from zensearch.zensearch import ZendeskSearch
+import os
+
+import pytest
+import ujson
 from zensearch.config import (
     MESSAGE_HOME,
     MESSAGE_SELECT_ENTITY,
@@ -6,9 +9,7 @@ from zensearch.config import (
     MESSAGE_SELECT_VALUE,
 )
 from zensearch.entity_engine import Entity
-import pytest
-import os
-import ujson
+from zensearch.zensearch import ZendeskSearch
 
 
 @pytest.fixture

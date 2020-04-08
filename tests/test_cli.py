@@ -1,9 +1,10 @@
-from main import main
-import pytest
-from unittest.mock import patch
-from zensearch.config import MESSAGE_BYE
-from zensearch.cli import CLI
 import os
+from unittest.mock import patch
+
+import pytest
+from main import main
+from zensearch.cli import CLI
+from zensearch.config import MESSAGE_BYE
 
 
 def get_quit_sequences():

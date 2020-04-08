@@ -1,6 +1,7 @@
-from zensearch.config import RELATIONSHIPS, ENTITY_TITLE_FIELDS
-from zensearch.entity_engine import Entity
 import os
+
+from zensearch.config import ENTITY_TITLE_FIELDS, RELATIONSHIPS
+from zensearch.entity_engine import Entity
 
 
 def get_entity_relationships(entity_name):
@@ -22,6 +23,8 @@ def get_entity_title(entity_name):
 
 
 def _auto_find_file_names(entity_names, datadir):
+    if not isinstance(entity_names, list):
+        raise TypeError("entity_names should be a list of entity names (str)")
     files_found = []
     files_in_dir = os.listdir(os.path.abspath(datadir))
     for name in entity_names:
@@ -46,11 +49,13 @@ def get_setup_entities(entity_names, data_files):
             data_files = [os.path.join(data_dir, file_name) for file_name in files]
         else:
             raise TypeError(
-                "Invalid data_files given. data_files should be a directory path to files or list() of file paths themselves"
+                "Invalid data_files given. data_files should be a directory path to files"
+                " or list() of file paths themselves"
             )
     elif not isinstance(data_files, list):
         raise TypeError(
-            "Invalid data_files given. data_files should be a directory path to files or list() of file paths themselves"
+            "Invalid data_files given. data_files should be a directory path to files"
+            " or list() of file paths themselves"
         )
 
     if len(entity_names) != len(data_files):

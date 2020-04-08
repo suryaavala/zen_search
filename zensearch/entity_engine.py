@@ -1,11 +1,10 @@
 from collections.abc import Hashable
 
-# import json
-
-from zensearch.exceptions import DuplicatePrimaryKeyError, PrimaryKeyNotFoundError
-
 # from copy import deepcopy
 import ujson
+from zensearch.exceptions import DuplicatePrimaryKeyError, PrimaryKeyNotFoundError
+
+# import json
 
 
 class Entity:

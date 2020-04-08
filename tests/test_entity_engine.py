@@ -1,9 +1,8 @@
 import json
 import os
-
-import pytest
 import unittest
 
+import pytest
 from zensearch.entity_engine import Entity
 from zensearch.exceptions import DuplicatePrimaryKeyError, PrimaryKeyNotFoundError
 

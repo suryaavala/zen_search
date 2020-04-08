@@ -1,23 +1,10 @@
-from zensearch.entity_engine import Entity
 from zensearch.utils import (
     get_entity_relationships,
-    get_setup_entities,
-    strtobool,
-    get_user_input,
     get_entity_title,
     get_related_match_string,
+    get_setup_entities,
+    strtobool,
 )
-from zensearch.config import (
-    MESSAGE_HOME,
-    MESSAGE_SELECT_ENTITY,
-    MESSAGE_SELECT_TERM,
-    MESSAGE_SELECT_VALUE,
-    MESSAGE_INVALID_SELECTION,
-    MESSAGE_DASHED_LINE,
-    SLEEP_TIMER,
-)
-import sys
-from time import sleep
 
 
 class ZendeskSearch:

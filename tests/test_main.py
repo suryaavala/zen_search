@@ -1,16 +1,17 @@
-from main import main
+from io import StringIO
+
 import pytest
+from main import main
 from zensearch.config import (
+    MESSAGE_BYE,
+    MESSAGE_DASHED_LINE,
     MESSAGE_HOME,
+    MESSAGE_INVALID_SELECTION,
     MESSAGE_SELECT_ENTITY,
     MESSAGE_SELECT_TERM,
     MESSAGE_SELECT_VALUE,
-    MESSAGE_INVALID_SELECTION,
-    MESSAGE_DASHED_LINE,
-    MESSAGE_BYE,
     SLEEP_TIMER,
 )
-from io import StringIO
 
 
 def test_main_loads(monkeypatch, capsys):

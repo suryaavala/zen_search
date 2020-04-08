@@ -1,14 +1,15 @@
+import os
+
+import pytest
 from zensearch.config import RELATIONSHIPS
+from zensearch.entity_engine import Entity
 from zensearch.utils import (
-    get_entity_relationships,
-    get_setup_entities,
-    get_entity_title,
     _auto_find_file_names,
+    get_entity_relationships,
+    get_entity_title,
+    get_setup_entities,
     strtobool,
 )
-from zensearch.entity_engine import Entity
-import pytest
-import os
 
 
 @pytest.fixture
@@ -69,6 +70,16 @@ class TestMiscUtils:
     def test_strtobool_bools(self, bools, expected):
         assert expected == strtobool(bools)
 
+    def test_auto_find_file_names_not_list(self):
+        not_a_list = [1, 0, "", "not_a_list", True, {}, None]
+        for entity_names in not_a_list:
+            with pytest.raises(TypeError) as error:
+                _auto_find_file_names(entity_names, "")
+            assert "entity_names should be a list of entity names (str)" == str(
+                error.value
+            )
+        assert True
+
 
 class TestSetupEntities:
     def test_setup_entities_valid(self, get_entity_names):
@@ -96,8 +107,8 @@ class TestSetupEntities:
             with pytest.raises(TypeError) as error:
                 get_setup_entities(get_entity_names, invalid_file)
             assert (
-                "Invalid data_files given. data_files should be a directory path to files or list() of file paths themselves"
-                in str(error.value)
+                "Invalid data_files given. data_files should be a directory path to files"
+                " or list() of file paths themselves" in str(error.value)
             )
         assert True
 
@@ -140,7 +151,7 @@ class TestSetupEntities:
                 f.write(f"{i}")
 
         with pytest.raises(LookupError) as error:
-            _auto_find_file_names(keyword, tmpdir)
+            _auto_find_file_names([keyword], tmpdir)
         assert f"Multiple files with keyword" in str(error.value)
 
     def test_setup_entities_invalid_dir(self, get_entity_names):
@@ -151,6 +162,6 @@ class TestSetupEntities:
             with pytest.raises(TypeError) as error:
                 get_setup_entities(get_entity_names, data_files=invalid)
             assert (
-                "Invalid data_files given. data_files should be a directory path to files or list() of file paths themselves"
-                == str(error.value)
+                "Invalid data_files given. data_files should be a directory path to files"
+                " or list() of file paths themselves" == str(error.value)
             )

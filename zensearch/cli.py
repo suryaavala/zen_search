@@ -1,21 +1,19 @@
-from zensearch.zensearch import ZendeskSearch
-from zensearch.utils import (
-    get_user_input,
-    get_entity_title,
-)
+import sys
+from itertools import chain, count
+from time import sleep
+
 from zensearch.config import (
+    MESSAGE_BYE,
+    MESSAGE_DASHED_LINE,
     MESSAGE_HOME,
+    MESSAGE_INVALID_SELECTION,
     MESSAGE_SELECT_ENTITY,
     MESSAGE_SELECT_TERM,
     MESSAGE_SELECT_VALUE,
-    MESSAGE_INVALID_SELECTION,
-    MESSAGE_DASHED_LINE,
-    MESSAGE_BYE,
     SLEEP_TIMER,
 )
-import sys
-from time import sleep
-from itertools import count, chain
+from zensearch.utils import get_user_input
+from zensearch.zensearch import ZendeskSearch
 
 
 class CLI(ZendeskSearch):

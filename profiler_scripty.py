@@ -1,9 +1,9 @@
 """Profiler script that was used to generate pstat report under ./docs/performance
 After commenting relevant sections this can be run as `python3 -m cProfile -o <reportname> profiler_scripty.py` from root dir of the repo
 """
+from unittest.mock import patch
 
 from zensearch.cli import CLI
-from unittest.mock import patch
 from zensearch.zensearch import ZendeskSearch
 
 cli_10000 = CLI(entity_names=["user", "ticket", "organization"], data_dir="./data/gen")
