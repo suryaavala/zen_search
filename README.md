@@ -1,4 +1,4 @@
-[![Build](https://github.com/suryaavala/zen_search/workflows/Test%20Build%20and%20Publish/badge.svg)](https://github.com/suryaavala/zen_search/workflows/Test%20Build%20and%20Publish/badge.svg) [![Python 3.7.6](https://img.shields.io/badge/python-v3.7-blue.svg)](https://www.python.org/downloads/release/python-376/)
+[![Build](https://github.com/suryaavala/zen_search/workflows/Test%20Build%20and%20Publish/badge.svg)](https://github.com/suryaavala/zen_search/workflows/Test%20Build%20and%20Publish/badge.svg) [![Python 3.7.6](https://img.shields.io/badge/python-v3.7-blue.svg)](https://www.python.org/downloads/release/python-376/) [![Total alerts](https://img.shields.io/lgtm/alerts/g/suryaavala/zen_search.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/suryaavala/zen_search/alerts/) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/suryaavala/zen_search.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/suryaavala/zen_search/context:python) 
 
 ## zensearch
 
