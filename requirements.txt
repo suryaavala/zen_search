@@ -1,1 +1,2 @@
+-i https://pypi.org/simple/
 ujson==1.35
